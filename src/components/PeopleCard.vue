@@ -41,7 +41,7 @@
             <div class="bar card-info-detail-ranges-range-bar" style="position: relative">
               <div
                   class="card-info-detail-ranges-range-bar__elem"
-                  v-for="(item, index) in calculatingPercentage"
+                  v-for="(item, index) in calcProgress"
                   :key="index"
                   :style="`width: ${item.Width}%; background: #${item.Color}; z-index: ${index}`"
               ></div>
@@ -49,32 +49,15 @@
           </div>
         </div>
         <div class="card-info-detail-percentage">
-          <div class="card-info-detail-percentage-block">
-            <div class="card-info-detail-percentage-block__rectangle">
+          <div
+              class="card-info-detail-percentage-block"
+              v-for="(item, index) in calcRectangles"
+              :key="index"
+          >
+            <div class="card-info-detail-percentage-block__rectangle" :style="`background: #${item.Color}; width: ${item.Width}%; grid-area: rectangle`">
             </div>
-            <div class="card-info-detail-percentage-block__percentage">
-              15%
-            </div>
-          </div>
-          <div class="card-info-detail-percentage-block">
-            <div class="card-info-detail-percentage-block__rectangle">
-            </div>
-            <div class="card-info-detail-percentage-block__percentage">
-              15%
-            </div>
-          </div>
-          <div class="card-info-detail-percentage-block">
-            <div class="card-info-detail-percentage-block__rectangle">
-            </div>
-            <div class="card-info-detail-percentage-block__percentage">
-              15%
-            </div>
-          </div>
-          <div class="card-info-detail-percentage-block">
-            <div class="card-info-detail-percentage-block__rectangle">
-            </div>
-            <div class="card-info-detail-percentage-block__percentage">
-              15%
+            <div class="card-info-detail-percentage-block__percentage" style="grid-area: percent">
+              {{ item.Amount }}%
             </div>
           </div>
         </div>
@@ -84,10 +67,18 @@
 </template>
 
 <script>
-function NewTest(obj, percent, width) {
+/* Конструкторы */
+function Progress(obj, percent, width) {
   this.Color = obj.Color;
   this.Amount = obj.Amount;
   this.Percent = percent;
+  this.Width = width;
+}
+
+function Rectangles(obj, width) {
+  this.id = obj.id;
+  this.Amount = obj.Amount;
+  this.Color = obj.Color;
   this.Width = width;
 }
 
@@ -125,32 +116,76 @@ export default {
     profit: {
       Color: "9F2B68",
       Amount: 257
-    }
+    },
+    lastBlock: [
+      {
+        id: 1,
+        Amount: 15,
+        Color: "E45959",
+      },
+      {
+        id: 2,
+        Amount: 12,
+        Color: "E4AC59",
+      },
+      {
+        id: 3,
+        Amount: 35,
+        Color: "5999E4",
+      },
+      {
+        id: 4,
+        Amount: 38,
+        Color: "56D953",
+      },
+    ]
   }),
   computed: {
-    calculatingPercentage() {
-      let arr = []
+    calcProgress() {
+      let result = []
+      let newArray = []
+
       let summary = this.test.reduce((a,b) => {
         return a + b.Amount
       }, 0)
+
       let iterator = 100
-      let newArray = []
+
       this.test.map(elem => newArray.push(elem))
+
       newArray.sort((a,b) => b.Amount - a.Amount)
+
       for (let i = 0; i < newArray.length; i++) {
         if (i === 0) {
           let percent = ((newArray[i].Amount)*100)/summary
           let width = iterator
           iterator-=percent
-          arr.push(new NewTest(newArray[i], percent, width))
+          result.push(new Progress(newArray[i], percent, width))
         } else {
           let percent = ((newArray[i].Amount)*100)/summary
           let width = iterator
-          iterator-=percent
-          arr.push(new NewTest(newArray[i], percent, width))
+          iterator -= percent
+          result.push(new Progress(newArray[i], percent, width))
         }
       }
-      return arr
+      return result
+    },
+    calcRectangles() {
+      const result = []
+      const newArray = []
+      const values = []
+
+      this.lastBlock.map(elem => newArray.push(elem))
+
+      this.lastBlock.map(elem => values.push(elem.Amount))
+
+      const max = Math.max(...values)
+
+      newArray.sort((a,b) => b.Amount - a.Amount).map(elem => {
+        let width = (elem.Amount*100)/max
+        result.push(new Rectangles(elem, width))
+      })
+      return result.sort((a,b) => a.id - b.id)
     },
     calcProfit() {
       let maximum = 560
@@ -189,11 +224,11 @@ export default {
       position: absolute;
       display: flex;
       flex-direction: column;
-      right: -35px;
-      top: 10px;
       row-gap: 2px;
-      &:first-child {
-        right: -25px !important;
+      top: 10px;
+      right: 0;
+      &__tag:first-child {
+        right: -15px !important;
       }
       &__tag {
         height: 20px;
@@ -202,6 +237,8 @@ export default {
         padding: 1px 9px;
         display: flex;
         align-items: center;
+        right: -30px;
+        position: relative;
         &__name {
           font-weight: 600;
           font-size: 12px;
@@ -280,15 +317,25 @@ export default {
         grid-template-columns: 50% 50%;
         column-gap: 8px;
         row-gap: 5px;
+        padding: 0 27px;
         .card-info-detail-percentage-block {
-          display: flex;
+          &:nth-child(2n) {
+            grid-template-areas: "rectangle percentage";
+            justify-items: start;
+          }
+          // FIXME: добавить динамику
+          display: grid;
           align-items: center;
+          grid-template-areas: "percentage rectangle";
+          justify-items: end;
+          //position: relative;
           &__rectangle {
             height: 37px;
-            width: 50px;
             opacity: 0.7;
             border-radius: 7px;
-            background: #E45959;
+          }
+          &__percentage {
+            //position: absolute;
           }
         }
       }
