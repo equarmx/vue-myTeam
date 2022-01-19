@@ -54,9 +54,14 @@
               v-for="(item, index) in calcRectangles"
               :key="index"
           >
-            <div class="card-info-detail-percentage-block__rectangle" :style="`background: #${item.Color}; width: ${item.Width}%; grid-area: rectangle`">
-            </div>
-            <div class="card-info-detail-percentage-block__percentage" style="grid-area: percent">
+            <div
+                class="card-info-detail-percentage-block__rectangle"
+                :style="`background: #${item.Color}; width: ${item.Width}%`"
+            ></div>
+            <div
+                class="card-info-detail-percentage-block__percentage"
+                :class="{absolute: item.Absolute, spacing: item.Less}"
+            >
               {{ item.Amount }}%
             </div>
           </div>
@@ -67,21 +72,6 @@
 </template>
 
 <script>
-/* Конструкторы */
-function Progress(obj, percent, width) {
-  this.Color = obj.Color;
-  this.Amount = obj.Amount;
-  this.Percent = percent;
-  this.Width = width;
-}
-
-function Rectangles(obj, width) {
-  this.id = obj.id;
-  this.Amount = obj.Amount;
-  this.Color = obj.Color;
-  this.Width = width;
-}
-
 export default {
   name: "PeopleCard",
   data: () => ({
@@ -160,12 +150,12 @@ export default {
           let percent = ((newArray[i].Amount)*100)/summary
           let width = iterator
           iterator-=percent
-          result.push(new Progress(newArray[i], percent, width))
+          result.push(new this.Progress(newArray[i], percent, width))
         } else {
           let percent = ((newArray[i].Amount)*100)/summary
           let width = iterator
           iterator -= percent
-          result.push(new Progress(newArray[i], percent, width))
+          result.push(new this.Progress(newArray[i], percent, width))
         }
       }
       return result
@@ -183,15 +173,34 @@ export default {
 
       newArray.sort((a,b) => b.Amount - a.Amount).map(elem => {
         let width = (elem.Amount*100)/max
-        result.push(new Rectangles(elem, width))
+        let absolute = width >= 85
+        let less = (elem.Amount < max) && !!absolute
+        result.push(new this.Rectangles(elem, width, absolute, less))
       })
       return result.sort((a,b) => a.id - b.id)
     },
     calcProfit() {
-      let maximum = 560
+      const maximum = 560
       return (this.profit.Amount*100)/maximum
-    }
-  }
+    },
+  },
+  methods: {
+    /* Конструкторы */
+    Progress(obj, percent, width) {
+      this.Color = obj.Color;
+      this.Amount = obj.Amount;
+      this.Percent = percent;
+      this.Width = width;
+    },
+    Rectangles(obj, width, absolute, less) {
+      this.id = obj.id;
+      this.Amount = obj.Amount;
+      this.Color = obj.Color;
+      this.Width = width;
+      this.Absolute = absolute;
+      this.Less = less;
+    },
+  },
 }
 </script>
 
@@ -314,28 +323,48 @@ export default {
       }
       .card-info-detail-percentage {
         display: grid;
-        grid-template-columns: 50% 50%;
+        grid-template-columns: 50% auto;
         column-gap: 8px;
         row-gap: 5px;
-        padding: 0 27px;
+        padding: 0 17px;
         .card-info-detail-percentage-block {
           &:nth-child(2n) {
-            grid-template-areas: "rectangle percentage";
-            justify-items: start;
+            justify-content: start;
+            .card-info-detail-percentage-block__rectangle {
+              order: 1;
+            }
+            .card-info-detail-percentage-block__percentage {
+              padding-left: 5px;
+              padding-right: 0;
+              order: 2;
+            }
+            .absolute {
+              right: 0;
+              left: unset;
+            }
           }
-          // FIXME: добавить динамику
-          display: grid;
+          display: flex;
           align-items: center;
-          grid-template-areas: "percentage rectangle";
-          justify-items: end;
-          //position: relative;
+          justify-content: end;
+          position: relative;
+          width: 100%;
           &__rectangle {
             height: 37px;
             opacity: 0.7;
             border-radius: 7px;
+            position: relative;
+            order: 2;
           }
           &__percentage {
-            //position: absolute;
+            padding-right: 5px;
+            order: 1;
+          }
+          .absolute {
+            position: absolute;
+            left: 0;
+          }
+          .spacing {
+            left: 18px;
           }
         }
       }
