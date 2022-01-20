@@ -1,22 +1,22 @@
 <template>
   <div class="card">
     <div class="card-top">
-      <img class="card-top__image" :src="'https://live.staticflickr.com/65535/51821757618_ee0ed812c0_m.jpg'" alt>
+      <img class="card-top__image" :src="person.Photo" alt="">
       <div class="card-top-tags">
         <div
             class="card-top-tags__tag"
-            v-for="(item, index) in tags"
+            v-for="(tag, index) in person.Tags"
             :key="index"
-            :style="`background: #${item.Color}`"
+            :style="`background: #${tag.Color}`"
         >
-          <span class="card-top-tags__tag__name">{{item.Name}}</span>
+          <span class="card-top-tags__tag__name">{{ tag.Name }}</span>
         </div>
       </div>
     </div>
     <div class="card-info">
       <div class="card-info-title">
-        <span class="card-info-title__name">Dimitry Kolesnikov</span>
-        <span class="card-info-title__position">Sr Full-stack engineer</span>
+        <span class="card-info-title__name">{{ person.Name }}</span>
+        <span class="card-info-title__position">{{ person.Title }}</span>
       </div>
       <div class="card-info__separator"></div>
       <div class="card-info-detail">
@@ -24,12 +24,12 @@
           <div class="card-info-detail-ranges-range">
             <div class="card-info-detail-ranges-range__header">
               <span class="card-info-detail-ranges-range__header__thin">Profit</span>
-              <span class="card-info-detail-ranges-range__header__bold">+ $257</span>
+              <span class="card-info-detail-ranges-range__header__bold">+ ${{ person.Profit[0].Amount }}</span>
             </div>
             <div class="card-info-detail-ranges-range-bar">
               <div
                   class="card-info-detail-ranges-range-bar__elem"
-                  :style="`width: ${calcProfit}%; background: #${profit.Color}; z-index: 1`"
+                  :style="`width: ${calcProfit}%; background: #${person.Profit[0].Color}; z-index: 1`"
               ></div>
             </div>
           </div>
@@ -38,7 +38,7 @@
               <span class="card-info-detail-ranges-range__header__thin">Attention</span>
               <span class="card-info-detail-ranges-range__header__bold">48 h</span>
             </div>
-            <div class="bar card-info-detail-ranges-range-bar" style="position: relative">
+            <div class="bar card-info-detail-ranges-range-bar">
               <div
                   class="card-info-detail-ranges-range-bar__elem"
                   v-for="(item, index) in calcProgress"
@@ -74,6 +74,7 @@
 <script>
 export default {
   name: "PeopleCard",
+  props: ['person'],
   data: () => ({
     test: [
       {
@@ -135,30 +136,32 @@ export default {
       let result = []
       let newArray = []
 
-      let summary = this.test.reduce((a,b) => {
-        return a + b.Amount
-      }, 0)
+      if (this.person.Attention !== null) {
+        let summary = this.person.Attention.reduce((a,b) => {
+          return a + b.Amount
+        }, 0)
 
-      let iterator = 100
+        let iterator = 100
 
-      this.test.map(elem => newArray.push(elem))
+        this.person.Attention.map(elem => newArray.push(elem))
 
-      newArray.sort((a,b) => b.Amount - a.Amount)
+        newArray.sort((a,b) => b.Amount - a.Amount)
 
-      for (let i = 0; i < newArray.length; i++) {
-        if (i === 0) {
-          let percent = ((newArray[i].Amount)*100)/summary
-          let width = iterator
-          iterator-=percent
-          result.push(new this.Progress(newArray[i], percent, width))
-        } else {
-          let percent = ((newArray[i].Amount)*100)/summary
-          let width = iterator
-          iterator -= percent
-          result.push(new this.Progress(newArray[i], percent, width))
+        for (let i = 0; i < newArray.length; i++) {
+          if (i === 0) {
+            let percent = ((newArray[i].Amount)*100)/summary
+            let width = iterator
+            iterator-=percent
+            result.push(new this.Progress(newArray[i], percent, width))
+          } else {
+            let percent = ((newArray[i].Amount)*100)/summary
+            let width = iterator
+            iterator -= percent
+            result.push(new this.Progress(newArray[i], percent, width))
+          }
         }
-      }
-      return result
+        return result
+      } else return []
     },
     calcRectangles() {
       const result = []
@@ -180,8 +183,8 @@ export default {
       return result.sort((a,b) => a.id - b.id)
     },
     calcProfit() {
-      const maximum = 560
-      return (this.profit.Amount*100)/maximum
+      const maximum = 1000
+      return (this.person.Profit[0].Amount*100)/maximum
     },
   },
   methods: {
@@ -215,10 +218,24 @@ export default {
   background: rgba(0, 0, 0, 0.0001);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
   font-family: 'Montserrat', sans-serif;
+  transition: box-shadow .4s ease-in-out;
+  animation: 2s ease-in-out;
+  &:hover {
+    box-shadow: 0 5px 28px rgba(0, 0, 0, 0.15);
+    .card-top-tags {
+      &__tag:first-child {
+        transform: translateX(-30px);
+      }
+      &__tag {
+        transform: translateX(-30px);
+      }
+    }
+  }
   .card-top {
     display: flex;
     align-items: center;
     width: 100%;
+    min-height: 146px;
     max-height: 146px;
     overflow: hidden;
     border-radius: 10px;
@@ -237,7 +254,7 @@ export default {
       top: 10px;
       right: 0;
       &__tag:first-child {
-        right: -15px !important;
+        right: -12px;
       }
       &__tag {
         height: 20px;
@@ -246,7 +263,7 @@ export default {
         padding: 1px 9px;
         display: flex;
         align-items: center;
-        right: -30px;
+        right: -26px;
         position: relative;
         &__name {
           font-weight: 600;
@@ -317,6 +334,7 @@ export default {
               height: 15px;
               border-radius: 5px;
               position: absolute;
+              background: #D7D7D7;
             }
           }
         }

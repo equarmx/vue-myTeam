@@ -1,6 +1,10 @@
 <template>
   <div class="wrapper">
-    <PeopleCard/>
+    <PeopleCard
+        v-for="(person, index) in $store.state.peopleList"
+        :key="index"
+        :person="person"
+    />
   </div>
 </template>
 
@@ -14,8 +18,13 @@ export default {
 
 <style lang="scss" scoped>
 .wrapper {
-  padding: 10px;
+  padding: 10px 0;
   display: flex;
-  justify-content: center;
+  justify-content: start;
+  flex-wrap: wrap;
+  column-gap: 52px;
+  row-gap: 41px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 </style>

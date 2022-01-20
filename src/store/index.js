@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import axios from "axios";
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    peopleList: []
+    peopleList: [],
+    num_page: 1,
   },
   mutations: {
     setPeopleList(state, arr) {
@@ -14,8 +16,11 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    // async set_People_list({commit}) {
-    //
-    // }
+    async set_People_list({commit, state}) {
+      axios.get(`https://api.in.dev-team.club/people?pp=${10}&p=${state.num_page}`)
+          .then((response) => {
+            commit('setPeopleList', response.data)
+          })
+    }
   },
 })

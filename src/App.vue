@@ -13,6 +13,9 @@ export default {
   data: () => ({
     //
   }),
+  created() {
+    this.$store.dispatch('set_People_list')
+  }
 };
 </script>
 
