@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card" @click="onShow(person)">
     <div class="card-top">
       <img class="card-top__image" :src="person.Photo" alt="">
       <div class="card-top-tags">
@@ -220,14 +220,15 @@ export default {
   font-family: 'Montserrat', sans-serif;
   transition: box-shadow .4s ease-in-out;
   animation: 2s ease-in-out;
+  cursor: pointer;
   &:hover {
     box-shadow: 0 5px 28px rgba(0, 0, 0, 0.15);
     .card-top-tags {
       &__tag:first-child {
-        transform: translateX(-30px);
+        transform: translateX(-14px);
       }
       &__tag {
-        transform: translateX(-30px);
+        transform: translateX(-27px);
       }
     }
   }
@@ -255,6 +256,7 @@ export default {
       right: 0;
       &__tag:first-child {
         right: -12px;
+        transition: all .2s ease-in-out;
       }
       &__tag {
         height: 20px;
@@ -265,6 +267,7 @@ export default {
         align-items: center;
         right: -26px;
         position: relative;
+        transition: all .2s ease-in-out;
         &__name {
           font-weight: 600;
           font-size: 12px;

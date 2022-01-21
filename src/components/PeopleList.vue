@@ -5,6 +5,11 @@
         :key="index"
         :person="person"
     />
+
+    <!-- MODALS -->
+    <v-dialog>
+
+    </v-dialog>
   </div>
 </template>
 
