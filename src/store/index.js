@@ -60,6 +60,7 @@ export default new Vuex.Store({
       state.peopleList.map(elem => {
         commit('calcProgress', elem)
         elem.Attention = state.updatedAttention
+        commit('calcRectangles', elem)
       })
     },
     calcProgress(state, object) {
@@ -90,26 +91,34 @@ export default new Vuex.Store({
     },
     calcRectangles(state, object) {
       /* NEED GENERATE AMOUNT RECTANGLE */
-      let defaultPercent
+      let defaultPercent = 100
+      object.Rectangles = state.rectangles.map(rectangle => {
+        if (rectangle.id === state.rectangles.length) {
+          rectangle.Amount = defaultPercent
+        } else {
+          rectangle.Amount = defaultPercent - Math.floor(Math.random() * (defaultPercent-10))
+          defaultPercent -= rectangle.Amount
+        }
+      })
 
       const result = []
-      const newArray = []
+      // const newArray = []
       const values = []
 
 
-      this.lastBlock.map(elem => newArray.push(elem))
+      // object.Rectangles.map(elem => newArray.push(elem))
 
-      this.lastBlock.map(elem => values.push(elem.Amount))
+      object.Rectangles.map(elem => values.push(elem.Amount))
 
       const max = Math.max(...values)
 
-      newArray.sort((a,b) => b.Amount - a.Amount).map(elem => {
+      object.Rectangles.sort((a,b) => b.Amount - a.Amount).map(elem => {
         let width = (elem.Amount*100)/max
         let absolute = width >= 85
         let less = (elem.Amount < max) && !!absolute
-        result.push(new this.Rectangles(elem, width, absolute, less))
+        result.push(new Rectangles(elem, width, absolute, less))
       })
-      return result.sort((a,b) => a.id - b.id)
+      object.Rectangles = result.sort((a,b) => a.id - b.id)
     },
   },
   actions: {
